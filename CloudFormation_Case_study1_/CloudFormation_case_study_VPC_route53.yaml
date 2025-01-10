@@ -1,0 +1,193 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Three-tier architecture with Route 53 and RDS retention"
+
+Parameters:
+  VPCCIDR:
+    Type: String
+    Default: "10.0.0.0/16"
+    Description: "CIDR block for the VPC"
+  PublicSubnetCIDR:
+    Type: String
+    Default: "10.0.1.0/24"
+    Description: "CIDR block for the public subnet"
+  PrivateAppSubnetCIDR:
+    Type: String
+    Default: "10.0.2.0/24"
+    Description: "CIDR block for the application subnet"
+  PrivateDBSubnetCIDR:
+    Type: String
+    Default: "10.0.3.0/24"
+    Description: "CIDR block for the DB subnet"
+
+Resources:
+  # VPC
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 172.31.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: "ThreeTierVPC"
+
+  # Internet Gateway
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: igw-0912bcb2dea355a9c
+      VpcId: vpc-09680e78bbae569c4
+
+  # Public Subnet
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 172.31.80.0/20 #us-east-1a
+      VpcId: vpc-09680e78bbae569c4
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: "PublicSubnet"
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: vpc-09680e78bbae569c4
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: rtb-0c80e08ba0efa74ce
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: igw-0912bcb2dea355a9c
+
+  PublicRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: rtb-0c80e08ba0efa74ce
+      SubnetId: subnet-02bbf8751b6a8663e
+
+  # Private Subnets
+  PrivateAppSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 172.31.16.0/20   #us-east-1b
+      VpcId: vpc-09680e78bbae569c4
+      Tags:
+        - Key: Name
+          Value: "PrivateAppSubnet"
+
+  PrivateDBSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 172.31.32.0/20 #us-east-1c
+      VpcId: vpc-09680e78bbae569c4
+      Tags:
+        - Key: Name
+          Value: "PrivateDBSubnet"
+
+  # Security Groups
+  WebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Allow HTTP and SSH from the internet"
+      VpcId: vpc-09680e78bbae569c4
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  AppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Allow SSH from Web Tier"
+      VpcId: vpc-09680e78bbae569c4
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: sg-062f5df15694a7237
+
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Allow MySQL from App Tier"
+      VpcId: vpc-09680e78bbae569c4
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: sg-062f5df15694a7237
+
+  # EC2 Instances
+  WebInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-0c02fb55956c7d316 # Amazon Linux 2
+      SubnetId: subnet-02bbf8751b6a8663e
+      SecurityGroupIds:
+        - sg-062f5df15694a7237
+      KeyName: keypairperma # Replace with your key pair name
+      Tags:
+        - Key: Name
+          Value: "WebInstance"
+
+  AppInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-0c02fb55956c7d316 # Amazon Linux 2
+      SubnetId: subnet-0e90b4c5803868b6c
+      SecurityGroupIds:
+        - sg-062f5df15694a7237
+      KeyName: keypairperma # Replace with your key pair name
+      Tags:
+        - Key: Name
+          Value: "AppInstance"
+
+  # RDS Instance
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: "Subnets for RDS DB"
+      SubnetIds:
+        - subnet-0e90b4c5803868b6c
+        - subnet-0e1eb5ffcd6a5ed78
+
+  RDSInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceClass: db.t3.micro
+      Engine: mysql
+      AllocatedStorage: 100
+      MasterUsername: admin
+      MasterUserPassword: password
+      VPCSecurityGroups:
+        - sg-062f5df15694a7237
+      DBSubnetGroupName: 
+    DeletionPolicy: Retain
+
+  # Route 53 Hosted Zone
+  Route53HostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: koma123.com
+
+  Route53RecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: Z083031938MZHELLOELYD
+      Name: www.koma123.com
+      Type: A
+      TTL: 300
+      ResourceRecords:
+        - !GetAtt WebInstance.PublicIp
