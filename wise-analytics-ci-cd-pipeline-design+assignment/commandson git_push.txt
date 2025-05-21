@@ -1,0 +1,81 @@
+total 44
+drwxr-x--- 8 ubuntu ubuntu 4096 May 21 16:23 .
+drwxr-xr-x 3 root   root   4096 May 21 14:55 ..
+-rw-r--r-- 1 ubuntu ubuntu  220 Mar 31  2024 .bash_logout
+-rw-r--r-- 1 ubuntu ubuntu 3771 Mar 31  2024 .bashrc
+drwx------ 2 ubuntu ubuntu 4096 May 21 14:55 .cache
+drwxrwxr-x 3 ubuntu ubuntu 4096 May 21 15:00 .java
+drwxrwxr-x 9 ubuntu ubuntu 4096 May 21 15:01 .jenkins
+drwxrwxr-x 3 ubuntu ubuntu 4096 May 21 15:08 .kube
+-rw-r--r-- 1 ubuntu ubuntu  807 Mar 31  2024 .profile
+drwx------ 2 ubuntu ubuntu 4096 May 21 14:55 .ssh
+-rw-r--r-- 1 ubuntu ubuntu    0 May 21 14:57 .sudo_as_admin_successful
+drwxrwxr-x 2 ubuntu ubuntu 4096 May 21 16:23 git
+ubuntu@ip-172-31-94-198:~$ cd g
+
+git remote add origin https://github.com/your-username/my-k8s-app.git
+
+ubuntu@ip-172-31-94-198:~/git$ # Step 1: Pull the latest changes with rebase
+git pull --rebase origin develop
+
+# Step 2: Push your changes
+git push origin develop
+From https://github.com/DadysCookin/wiseanalytics-assignment
+ * branch            develop    -> FETCH_HEAD
+Successfully rebased and updated refs/heads/develop.
+Username for 'https://github.com': Dadyscookin
+Password for 'https://Dadyscookin@github.com': 
+Enumerating objects: 4, done.
+Counting objects: 100% (4/4), done.
+Delta compression using up to 2 threads
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 314 bytes | 314.00 KiB/s, done.
+Total 3 (delta 1), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (1/1), completed with 1 local object.
+To https://github.com/DadysCookin/wiseanalytics-assignment.git
+   185f339..e046871  develop -> develop
+ubuntu@ip-172-31-94-198:~/git$ 
+ubuntu@ip-172-31-94-198:~/git$ 
+ubuntu@ip-172-31-94-198:~/git$ 
+
+ubuntu@ip-172-31-94-198:~/git$ 
+ubuntu@ip-172-31-94-198:~/git$ 
+ubuntu@ip-172-31-94-198:~/git$ git status
+On branch develop
+nothing to commit, working tree clean
+ubuntu@ip-172-31-94-198:~/git$ git 1.txt
+git: '1.txt' is not a git command. See 'git --help'.
+ubuntu@ip-172-31-94-198:~/git$ sudo nano  1.txt
+ubuntu@ip-172-31-94-198:~/git$ 
+ubuntu@ip-172-31-94-198:~/git$ git add .
+ubuntu@ip-172-31-94-198:~/git$ git commit -m "added"
+[develop 72732a4] added
+ Committer: Ubuntu <ubuntu@ip-172-31-94-198.ec2.internal>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 1 file changed, 2 insertions(+)
+ubuntu@ip-172-31-94-198:~/git$ 
+ubuntu@ip-172-31-94-198:~/git$ 
+ubuntu@ip-172-31-94-198:~/git$ git push origin develop
+Username for 'https://github.com': Dadyscookin
+Password for 'https://Dadyscookin@github.com': 
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 2 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 322 bytes | 322.00 KiB/s, done.
+Total 3 (delta 1), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (1/1), completed with 1 local object.
+To https://github.com/DadysCookin/wiseanalytics-assignment.git
+   e046871..72732a4  develop -> develop
+ubuntu@ip-172-31-94-198:~/git$ 
